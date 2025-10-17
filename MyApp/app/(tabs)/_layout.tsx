@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { Platform } from "react-native";
 
 const _layout = () => {
   return (
@@ -8,24 +9,29 @@ const _layout = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: "#2563eb", // blue-600
-        tabBarInactiveTintColor: "#9ca3af", // gray-400
+        tabBarActiveTintColor: "#2e7d32", 
+        tabBarInactiveTintColor: "#9ca3af", 
         tabBarStyle: {
-          backgroundColor: "#f9fafb", // gray-50
+          backgroundColor: "#ffffff", 
           borderTopWidth: 1,
-          borderTopColor: "#e5e7eb",
-          height: 65,
-          paddingBottom: 8,
+          borderTopColor: "#e0e0e0",
+          height: Platform.OS === "ios" ? 85 : 65,
+          paddingBottom: Platform.OS === "ios" ? 20 : 8,
           paddingTop: 8,
           elevation: 5,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          position: "absolute",
+          bottom: 0,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "600",
+          marginTop: 2,
         },
       }}
     >

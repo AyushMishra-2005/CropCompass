@@ -1,11 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Link, useRouter } from 'expo-router';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [authUser, setAuthUser] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     loadAuthData();
@@ -14,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const loadAuthData = async () => {
     try {
       const authUserData = await AsyncStorage.getItem("authUserData");
+
       if (authUserData) {
         setAuthUser(JSON.parse(authUserData));
       }
@@ -41,6 +44,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await AsyncStorage.removeItem("authUserData");
       setAuthUser(undefined);
+      router.push('/Login');
     } catch (error) {
       console.error('Error during logout:', error);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   Image
 } from 'react-native';
 import axios from 'axios';
-import { useAuth } from '../../src/context/AuthProvider';
+import { useAuth } from '../../context/AuthProvider.jsx';
 import { Link, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -31,9 +31,9 @@ const OTPInput = ({ value, onChange, error, disabled, onFocus, focusedIndex }) =
 
   const handleChange = (text, index) => {
     if (!/^\d*$/.test(text)) return;
-    
+
     const newOtp = [...value.split('')];
-    
+
     if (text.length > 1) {
       const pastedDigits = text.split('').slice(0, 6 - index);
       pastedDigits.forEach((digit, i) => {
@@ -43,12 +43,12 @@ const OTPInput = ({ value, onChange, error, disabled, onFocus, focusedIndex }) =
       });
       const newOtpString = newOtp.join('');
       onChange(newOtpString);
-      
+
       const lastFilledIndex = Math.min(index + pastedDigits.length - 1, 5);
       focusInput(lastFilledIndex);
       return;
     }
-    
+
     newOtp[index] = text;
     const newOtpString = newOtp.join('');
     onChange(newOtpString);
@@ -100,13 +100,17 @@ function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
   const [profileFile, setProfileFile] = useState(null);
-  const { setAuthUser } = useAuth();
+  const { setAuthUser, authUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [sendingOtp, setSendingOtp] = useState(false);
   const [focusedOtpIndex, setFocusedOtpIndex] = useState(-1);
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (authUser) router.replace("/(tabs)");
+  }, [authUser]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -343,12 +347,8 @@ function SignUp() {
       );
 
       if (response.data) {
-        // Store user data in AsyncStorage (React Native equivalent of localStorage)
         await AsyncStorage.setItem("authUserData", JSON.stringify(response.data));
         setAuthUser(response.data);
-        
-        Alert.alert('Success', 'SignUp successful! You can now login.');
-        router.push('/Login');
       }
     } catch (err) {
       console.log("Error in signup page : ", err);

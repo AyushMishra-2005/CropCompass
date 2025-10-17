@@ -12,13 +12,15 @@ import {
   ActivityIndicator
 } from 'react-native';
 import axios from 'axios';
-import { useAuth } from '../../src/context/AuthProvider';
+import { useAuth } from '../../context/AuthProvider.jsx';
 import { Link, useRouter } from 'expo-router';
 import server from '../../envirnoment';
+import { useEffect } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const { setAuthUser } = useAuth();
+  const { setAuthUser, authUser } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     otp: ['', '', '', '', '', ''],
@@ -31,11 +33,14 @@ function Login() {
   });
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  
+
   const router = useRouter();
   const otpRefs = useRef([]);
 
-  // Initialize refs for OTP inputs
+  useEffect(() => {
+    if (authUser) router.replace("/(tabs)");
+  }, [authUser]);
+
   React.useEffect(() => {
     otpRefs.current = [...Array(6)].map((_, i) => otpRefs.current[i] || React.createRef());
   }, []);
@@ -45,7 +50,7 @@ function Login() {
       ...prev,
       [name]: value
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -82,9 +87,9 @@ function Login() {
       Alert.alert('Error', 'Email is required');
       return;
     }
-    
+
     setIsSendingOtp(true);
-    
+
     try {
       const { data } = await axios.post(
         `${server}/user/sendOTP`,
@@ -176,37 +181,33 @@ function Login() {
         withGoogle: false,
       };
 
-      await axios.post(`${server}/user/login`, userInfo, {
+      const response = await axios.post(`${server}/user/login`, userInfo, {
         withCredentials: true,
       })
-        .then((response) => {
-          if (response.data) {
-            Alert.alert('Success', 'User logged in successfully!');
-            // Store user data
-            // setAuthUser(response.data);
-          } else {
-            Alert.alert('Error', 'Failed to log in!');
-            return;
-          }
-        })
-        .catch((err) => {
-          console.log("Error in login: ", err);
-          Alert.alert('Error', 'Login failed. Please try again.');
-        });
+
+      if (response.data) {
+        await AsyncStorage.setItem("authUserData", JSON.stringify(response.data));
+        setAuthUser(response.data);
+      }
+
     } catch (err) {
       console.log(err);
-      Alert.alert('Error', 'An error occurred during login.');
+      if (err.response && err.response.data) {
+        Alert.alert('Error', err.response.data.message || "Signup failed. Please try again.");
+      } else {
+        Alert.alert('Error', "Signup failed. Please try again.");
+      }
     } finally {
       setIsLoggingIn(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
