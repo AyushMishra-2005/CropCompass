@@ -82,7 +82,7 @@ app.post("/testing-esp", async (req, res) => {
   const { command, esp_id } = req.body;
   try {
     const { data } = await axios.post(
-      'http://localhost:8001/send-command',
+      'https://cropcompassespserver.onrender.com/send-command',
       { esp_id, command },
     );
 
