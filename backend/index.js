@@ -5,24 +5,25 @@ import cors from 'cors';
 import user from './route/user.route.js';
 import cookieParser from 'cookie-parser';
 import { v2 as cloudinary } from 'cloudinary';
+import axios from 'axios';
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8000;
-const MONGO_URI = process.env.MONGODB_URI; 
+const MONGO_URI = process.env.MONGODB_URI;
 
-const allowedOrigins = ["exp://172.16.139.41:8081"];
+const allowedOrigins = ["exp://172.16.139.41:8081", "https://cropcompassespserver.onrender.com", "http://localhost:8001"];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if(!origin || allowedOrigins.includes(origin)){
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 
@@ -71,9 +72,25 @@ app.post('/deleteImage', async (req, res) => {
     const result = await cloudinary.uploader.destroy(publicId, {
       invalidate: true,
     });
-    res.status(200).json({result});
+    res.status(200).json({ result });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/testing-esp", async (req, res) => {
+  const { command, esp_id } = req.body;
+  try {
+    const { data } = await axios.post(
+      'http://localhost:8001/send-command',
+      { esp_id, command },
+    );
+
+    console.log(data);
+
+    return res.status(200).json({ message: "success" });
+  } catch (err) {
+    return res.status(500).json({ message: "error" });
   }
 });
 

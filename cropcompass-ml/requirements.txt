@@ -1,0 +1,8 @@
+Flask
+torch
+numpy
+pandas
+tqdm
+python-dotenv
+scikit-learn
+seaborn
