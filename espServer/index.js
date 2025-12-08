@@ -65,7 +65,7 @@ app.post("/send-command", (req, res) => {
 
   client.publish(topic, command, { qos: 1 }, (err) => {
     if (err) return res.status(500).json({ success: false, message: err.message });
-    res.json({ success: true, message: `Command "${command}" sent to ${esp_id}`, sensorDataStore});
+    res.json({ success: true, message: `Command "${command}" sent to ${esp_id}`});
   });
 });
 
