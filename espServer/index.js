@@ -3,10 +3,13 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
+import axios from 'axios';
 
 const app = express();
 app.use(express.json());
-app.use(cors())
+app.use(cors({
+  origin: "*"
+}));
 
 const PORT = process.env.PORT || 8001;
 const MQTT_BROKER = "mqtt://broker.hivemq.com"; 
@@ -37,7 +40,7 @@ client.on('message', (topic, message) => {
   console.log(`MQTT message received on ${topic}: ${msgString}`);
 });
 
-app.post("/sensor-data", (req, res) => {
+app.post("/sensor-data", async (req, res) => {
   const data = req.body;
   
   if (!data.espId || !data.DHT22_Temp || !data.DHT22_Humidity || !data.DS18B20_Temp) {
@@ -52,6 +55,13 @@ app.post("/sensor-data", (req, res) => {
   console.log("DS18B20 Temperature:", data.DS18B20_Temp);
 
   res.json({ success: true, message: "Data received" });
+
+  try{
+    await axios.post("http://localhost:8000/receive-sensor-data", data);
+    console.log("Forwarded data successfully");
+  }catch(err){
+    console.log("Forward error to server: ", err.message);
+  }
 });
 
 
@@ -68,12 +78,6 @@ app.post("/send-command", (req, res) => {
     res.json({ success: true, message: `Command "${command}" sent to ${esp_id}`});
   });
 });
-
-
-app.get("/sensor-data", (req, res) => {
-  res.json({ success: true, data: sensorDataStore });
-});
-
 
 app.get("/", (req, res) => res.send("MQTT backend running"));
 

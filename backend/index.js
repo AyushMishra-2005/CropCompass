@@ -13,7 +13,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 const MONGO_URI = process.env.MONGODB_URI;
 
-const allowedOrigins = ["exp://172.16.139.41:8081", "https://cropcompassespserver.onrender.com", "http://localhost:8001"];
+const allowedOrigins = ["https://cropcompassespserver.onrender.com", "http://localhost:8001"];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -94,6 +94,21 @@ app.post("/testing-esp", async (req, res) => {
   }
 });
 
+app.post("/receive-sensor-data", (req, res) => {
+  const data = req.body;
+
+  if(!data){
+    return req.status(400).json({ success: false, message: "No data received" });
+  }
+
+  console.log("Received Sensor Data on Final Server:");
+  console.log("ESP ID:", data.espId);
+  console.log("DHT22 Temperature:", data.DHT22_Temp);
+  console.log("DHT22 Humidity:", data.DHT22_Humidity);
+  console.log("DS18B20 Temperature:", data.DS18B20_Temp);
+
+  return res.json({ success: true, message: "Sensor data received successfully" });
+});
 app.listen(port, () => {
   console.log(`App is running at port ${port}`);
 });

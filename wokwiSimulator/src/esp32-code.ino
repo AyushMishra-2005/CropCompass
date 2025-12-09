@@ -17,7 +17,7 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 
-const char* serverUrl = "https://cropcompassespserver.onrender.com/sensor-data";
+const char* serverUrl = "http://10.138.21.41:8001/sensor-data";
 
 #define DHTPIN 4
 #define DHTTYPE DHT22
