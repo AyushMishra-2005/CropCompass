@@ -15,7 +15,6 @@ const PORT = process.env.PORT || 8001;
 const MQTT_BROKER = "mqtt://broker.hivemq.com"; 
 const MQTT_TOPIC_PREFIX = "myESPProject/";
 
-let sensorDataStore = [];
 
 const client = mqtt.connect(MQTT_BROKER);
 
@@ -46,13 +45,6 @@ app.post("/sensor-data", async (req, res) => {
   if (!data.espId || !data.DHT22_Temp || !data.DHT22_Humidity || !data.DS18B20_Temp) {
     return res.status(400).json({ success: false, message: "Invalid sensor data" });
   }
-
-  sensorDataStore.push({ ...data, timestamp: new Date() });
-  
-  console.log(`Received sensor data from ${data.espId}`);
-  console.log("DHT22 Temperature:", data.DHT22_Temp);
-  console.log("DHT22 Humidity:", data.DHT22_Humidity);
-  console.log("DS18B20 Temperature:", data.DS18B20_Temp);
 
   res.json({ success: true, message: "Data received" });
 
